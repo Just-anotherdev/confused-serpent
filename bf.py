@@ -23,16 +23,19 @@ class tape():
 			quit()
 			
 	def incrementcell(self):
-		self.currentvalue = self.currentvalue + 1
+		if self.currentvalue >= 255:
+			self.currentvalue = 0
+		else:
+			self.currentvalue = self.currentvalue + 1
 	
 	def decrementccell(self):
 		if self.currentvalue > 0:
-			print("value error: cells cannot go negative")
-			quit()
-			
-	def printcell(self):
-		print(chr(self.currentvalue))
+			self.currentvalue = self.currentvalue - 1
+		else: self.currentvalue = 255			
 		
+	def printcell(self):
+		print(chr(int(self.currentvalue)))
+		print(int(self.currentvalue))
 	def fillcellbyascii(self, newcharacter):
 		if type(newcharacter) is str:
 			if len(self.newcharacter) == 1:
@@ -60,9 +63,17 @@ class bfengine():
 			print("error: issues reading the bf file please ensure it is actually a brainfuck program")
 		self.programbuffer = list(self.programbuffer)
 		self.instructionpointer = 0
-		self.instruction = self.programbuffer[self.instructionpointer]
+		print(self.programbuffer)
+		loops = 0
 		self.running = 1
 		while self.running == 1:
+			loops = loops + 1
+			#print("successful loops")
+			if self.instructionpointer == len(self.programbuffer):
+				quit()
+			self.instruction = self.programbuffer[int(self.instructionpointer)]
+			#print(f"instruction: {self.instruction} current cell value {self.tape.currentvalue}")
+			#print(f"current location in tape: {self.tape.pointer}")
 			if self.instruction == "<":
 				self.tape.decrementpointer()
 			elif self.instruction == ">":
@@ -77,35 +88,40 @@ class bfengine():
 				self.tape.fillcellbyascii(self.programbuffer[self.instructionpointer + 1])
 			elif self.instruction == "[":
 				if self.tape.currentvalue == 0:
-					if self.instrucctionpointer <= len(self.programbuffer) + 1:
+					if self.instructionpointer < len(self.programbuffer) + 1:
 						self.instructionpointer = self.instructionpointer + 1
+						self.instruction = self.programbuffer[self.instructionpointer]
 						while self.instruction != "]":
-							if self.instrucctionpointer <= len(self.programbuffer) + 1:
+							
+							if self.instructionpointer <= len(self.programbuffer) + 1:
 								self.instructionpointer = self.instructionpointer + 1
+								self.instruction = self.programbuffer[self.instructionpointer]
 							else:
 								print("syntax error: unmatched brackets")
 								quit()
 					else:
 						print("syntax error: unmatched brackets")
 						quit()
+						
 			elif self.instruction == "]":
 				if self.tape.currentvalue != 0:
-					if self.instructionpointer > 0:
+					if self.instructionpointer != 0:
 						self.instructionpointer = self.instructionpointer - 1
 					else:
 						print("syntax error: unmatched brackets")
 						quit()
 					while self.instruction != "[":
-						if self.instructionpointer > 0:
+						self.instruction = self.programbuffer[self.instructionpointer]
+						if self.instructionpointer != 0:
 							self.instructionpointer = self.instructionpointer - 1
 						else:
 							print("syntax error: unmatched brackets")
 							quit()
 			if self.instructionpointer < len(self.programbuffer):
 				self.instructionpointer = self.instructionpointer + 1
-				print("one loop down")
+				#print("one loop down")
 			else:
-				running = 0
+				self.running = 0
 		print("program completed with no errors")
 	
 confused_serpent = bfengine()
