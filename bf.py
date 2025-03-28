@@ -6,7 +6,7 @@ from time import sleep
 class tape():
 	
 	def __init__(self):
-		self.fulltape = [0] * 10
+		self.fulltape = [0] * 1000
 		self.index = 0
 		self.currentvalue = self.fulltape[self.index]
 		
@@ -21,12 +21,12 @@ class tape():
 		if self.index > 0:
 			self.index = self.index - 1
 		else:
-			print("out of bounds error: tape does not wrap")
+			self.index = 30000
 			quit()
 			
 	def incrementcell(self):
 		self.currentvalue = self.fulltape[self.index]
-		if self.currentvalue >= 255:
+		if self.currentvalue >= 256:
 			self.currentvalue = 0
 		else:
 			self.currentvalue = self.currentvalue + 1
@@ -38,11 +38,11 @@ class tape():
 			self.currentvalue = 255
 		else:
 			self.currentvalue = self.currentvalue - 1
-			print(f"currentvalue {self.currentvalue} cell value{self.fulltape[self.index]}")
+			#print(f"currentvalue {self.currentvalue} cell value{self.fulltape[self.index]}")
 		self.fulltape[self.index] = self.currentvalue
 		
 	def printcell(self):
-		self.fulltape[self.index]
+		self.currentvalue = self.fulltape[self.index]
 		sys.stdout.write(chr(int(self.currentvalue)))
 		sys.stdout.flush()
 		#sys.stdout.write(f"{int(self.currentvalue)}")
@@ -69,8 +69,7 @@ class bfengine():
 			self.bffile = open(sys.argv[1], "r")
 			self.programbuffer = self.bffile.readlines()
 		else:
-			self.programbuffer = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
-
+			self.programbuffer = """">>>++->++>+++>+>+>++>>+>+>+++>>+>+>++>+++>+++>+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>+>+>++>>>+++>>>>>+++>+>>>>>>>>>>>>>>>>>>>>>>+++>>>>>>>++>+++>+++>+>>+++>+++>+>+++>+>+++>+>++>+++>>>+>+>+>+>++>+++>+>+>>+++>>>>>>>+>+>>>+>+>++>+++>+++>+>>+++>+++>+>+++>+>++>+++>++>>+>+>++>+++>+>+>>+++>>>+++>+>>>++>+++>+++>+>>+++>>>+++>+>+++>+>>+++>>+++>>+[[>>+[>]+>+[<]<-]>>[>]<+<+++[<]<<+]>>>[>]+++[++++++++++>++[-<++++++++++++++++>]<.<-<]"""
 
 		if type(self.programbuffer) is list:
 			self.programbuffer = "".join(self.programbuffer)
@@ -107,11 +106,12 @@ class bfengine():
 						self.instructionindex = self.instructionindex + 1
 						self.instruction = self.programbuffer[self.instructionindex]
 						openbrackets = 0
-						while self.instruction != "]" and self.openbrackets == 0:
+						while self.instruction != "]" and openbrackets == 0:
 							if self.instruction =="[":
 								openbrackets = openbrackets + 1
 							elif self.instruction == "]":
-								openbrackets = openbrackets - 1
+								if openbrackets != 0:
+									openbrackets = openbrackets - 1
 							
 							if self.instructionindex + 1 < len(self.programbuffer):
 								self.instructionindex = self.instructionindex + 1
@@ -137,7 +137,8 @@ class bfengine():
 						if self.instruction == "]":
 							closedbrackets = closedbrackets + 1
 						elif self.instruction == "[":
-							closedbrackets = closedbrackets - 1
+							if self.closedbrackets != 0:
+								closedbrackets = closedbrackets - 1
 						if self.instructionindex > 0:
 							#print(f"in ] instructionindex: {self.instructionindex} instruction: {self.instruction}") #debug
 							self.instructionindex = self.instructionindex - 1
@@ -151,6 +152,6 @@ class bfengine():
 				self.instruction = self.programbuffer[self.instructionindex]
 			else:
 				self.running = 0
-		print("program completed with no errors")
+		print("\nprogram completed with no errors")
 		print (self.tape.fulltape)
 confused_serpent = bfengine()
